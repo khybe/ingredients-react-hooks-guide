@@ -7,7 +7,7 @@ import Search from "./Search";
 function Ingredients() {
   const [userIngredients, setUserIngredients] = useState([]);
 
-  //  Since the Search component now loads ingredients directly, we no longer require the useEffect
+  //  Since the Search component now loads ingredients directly, we no longer require this useEffect
   //  hook, which helps us avoid unnecessary extra rendering.
 
   // useEffect(() => {
