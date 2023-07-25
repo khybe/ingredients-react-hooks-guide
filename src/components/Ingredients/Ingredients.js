@@ -2,10 +2,13 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
+import ErrorModal from "../UI/ErrorModal";
 import Search from "./Search";
 
 function Ingredients() {
   const [userIngredients, setUserIngredients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   //  Since the Search component now loads ingredients directly, we no longer require this useEffect
   //  hook, which helps us avoid unnecessary extra rendering.
@@ -38,6 +41,7 @@ function Ingredients() {
   }, []);
 
   const addIngredientHandler = (ingredient) => {
+    setIsLoading(true);
     fetch(
       "https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients.json",
       {
@@ -47,6 +51,7 @@ function Ingredients() {
       }
     )
       .then((response) => {
+        setIsLoading(false);
         return response.json();
       })
       .then((responseData) => {
@@ -54,25 +59,48 @@ function Ingredients() {
           ...prevIngredients,
           { id: responseData.name, ...ingredient },
         ]);
+      })
+      .catch((error) => {
+        setError(
+          "Something went wrong with adding ingredient, please try again later, or contact the admin."
+        );
+        setIsLoading(false);
       });
   };
 
   const removeItemHandler = (itemId) => {
+    setIsLoading(true);
     fetch(
       `https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients/${itemId}/.json`,
       {
         method: "DELETE",
       }
-    ).then((response) => {
-      setUserIngredients((prevIngredients) => {
-        return prevIngredients.filter((item) => item.id !== itemId);
+    )
+      .then((response) => {
+        setIsLoading(false);
+        setUserIngredients((prevIngredients) => {
+          return prevIngredients.filter((item) => item.id !== itemId);
+        });
+      })
+      .catch((error) => {
+        setError(
+          "Something went wrong with removing ingredient, please try again later, or report this to admin."
+        );
+        setIsLoading(false);
       });
-    });
+  };
+
+  const clearErrorHandler = () => {
+    setError(null);
   };
 
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientHandler} />
+      {error && <ErrorModal onClose={clearErrorHandler}>{error}</ErrorModal>}
+      <IngredientForm
+        onAddIngredient={addIngredientHandler}
+        onLoading={isLoading}
+      />
 
       <section>
         <Search onFilterIngredients={filterIngredientsHandler} />
