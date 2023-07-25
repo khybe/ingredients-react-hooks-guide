@@ -58,8 +58,15 @@ function Ingredients() {
   };
 
   const removeItemHandler = (itemId) => {
-    setUserIngredients((prevIngredients) => {
-      return prevIngredients.filter((item) => item.id !== itemId);
+    fetch(
+      `https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients/${itemId}/.json`,
+      {
+        method: "DELETE",
+      }
+    ).then((response) => {
+      setUserIngredients((prevIngredients) => {
+        return prevIngredients.filter((item) => item.id !== itemId);
+      });
     });
   };
 
