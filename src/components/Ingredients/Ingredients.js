@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
@@ -18,10 +18,27 @@ const ingredientReducer = (currentIngredients, action) => {
   }
 };
 
+const httpReducer = (currHttpState, action) => {
+  switch (action.type) {
+    case "SEND":
+      return { loading: true, error: null };
+    case "RESPONSE":
+      return { ...currHttpState, loading: false };
+    case "ERROR":
+      return { loading: false, error: action.errorMessage };
+    case "CLEAR":
+      return { ...currHttpState, error: null };
+    default:
+      throw new Error("Should not be reached!");
+  }
+};
+
 function Ingredients() {
   const [userIngredients, dispatch] = useReducer(ingredientReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [httpState, dispatchHttp] = useReducer(httpReducer, {
+    loading: false,
+    error: null,
+  });
 
   //  Since the Search component now loads ingredients directly, we no longer require this useEffect
   //  hook, which helps us avoid unnecessary extra rendering.
@@ -54,7 +71,7 @@ function Ingredients() {
   }, []);
 
   const addIngredientHandler = (ingredient) => {
-    setIsLoading(true);
+    dispatchHttp({ type: "SEND" });
     fetch(
       "https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients.json",
       {
@@ -64,7 +81,7 @@ function Ingredients() {
       }
     )
       .then((response) => {
-        setIsLoading(false);
+        dispatchHttp({ type: "RESPONSE" });
         return response.json();
       })
       .then((responseData) => {
@@ -74,15 +91,16 @@ function Ingredients() {
         });
       })
       .catch((error) => {
-        setError(
-          "Something went wrong with adding ingredient, please try again later, or contact the admin."
-        );
-        setIsLoading(false);
+        dispatchHttp({
+          type: "ERROR",
+          errorMessage:
+            "Something went wrong with adding ingredient, please try again later, or contact the admin.",
+        });
       });
   };
 
   const removeItemHandler = (itemId) => {
-    setIsLoading(true);
+    dispatchHttp({ type: "SEND" });
     fetch(
       `https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients/${itemId}/.json`,
       {
@@ -90,27 +108,31 @@ function Ingredients() {
       }
     )
       .then((response) => {
-        setIsLoading(false);
+        dispatchHttp({ type: "RESPONSE" });
+
         dispatch({ type: "DELETE", id: itemId });
       })
       .catch((error) => {
-        setError(
-          "Something went wrong with removing ingredient, please try again later, or report this to admin."
-        );
-        setIsLoading(false);
+        dispatchHttp({
+          type: "ERROR",
+          errorMessage:
+            "Something went wrong with removing ingredient, please try again later, or report this to admin.",
+        });
       });
   };
 
   const clearErrorHandler = () => {
-    setError(null);
+    dispatchHttp({ type: "CLEAR" });
   };
 
   return (
     <div className="App">
-      {error && <ErrorModal onClose={clearErrorHandler}>{error}</ErrorModal>}
+      {httpState.error && (
+        <ErrorModal onClose={clearErrorHandler}>{httpState.error}</ErrorModal>
+      )}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
-        onLoading={isLoading}
+        onLoading={httpState.loading}
       />
 
       <section>
