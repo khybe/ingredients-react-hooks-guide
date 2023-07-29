@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback, useMemo } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
@@ -40,37 +40,11 @@ function Ingredients() {
     error: null,
   });
 
-  //  Since the Search component now loads ingredients directly, we no longer require this useEffect
-  //  hook, which helps us avoid unnecessary extra rendering.
-
-  // useEffect(() => {
-  //   fetch(
-  //     "https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients.json"
-  //   )
-  //     .then((response) => response.json())
-  //     .then((responseData) => {
-  //       const loadedIngredients = [];
-
-  //       for (const key in responseData) {
-  //         loadedIngredients.push({
-  //           id: key,
-  //           title: responseData[key].title,
-  //           amount: responseData[key].amount,
-  //         });
-  //         setUserIngredients(loadedIngredients);
-  //       }
-  //     });
-  // }, []);
-
-  useEffect(() => {
-    console.log("RENDERING INGREDIENTS", userIngredients);
-  });
-
   const filterIngredientsHandler = useCallback((filteredIngredients) => {
     dispatch({ type: "SET", ingredients: filteredIngredients });
   }, []);
 
-  const addIngredientHandler = (ingredient) => {
+  const addIngredientHandler = useCallback((ingredient) => {
     dispatchHttp({ type: "SEND" });
     fetch(
       "https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients.json",
@@ -97,9 +71,9 @@ function Ingredients() {
             "Something went wrong with adding ingredient, please try again later, or contact the admin.",
         });
       });
-  };
+  }, []);
 
-  const removeItemHandler = (itemId) => {
+  const removeItemHandler = useCallback((itemId) => {
     dispatchHttp({ type: "SEND" });
     fetch(
       `https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients/${itemId}/.json`,
@@ -119,11 +93,20 @@ function Ingredients() {
             "Something went wrong with removing ingredient, please try again later, or report this to admin.",
         });
       });
-  };
+  }, []);
 
-  const clearErrorHandler = () => {
+  const clearErrorHandler = useCallback(() => {
     dispatchHttp({ type: "CLEAR" });
-  };
+  }, []);
+
+  const ingredientList = useMemo(() => {
+    return (
+      <IngredientList
+        ingredients={userIngredients}
+        onRemoveItem={removeItemHandler}
+      />
+    );
+  }, [userIngredients, removeItemHandler]);
 
   return (
     <div className="App">
@@ -137,10 +120,7 @@ function Ingredients() {
 
       <section>
         <Search onFilterIngredients={filterIngredientsHandler} />
-        <IngredientList
-          ingredients={userIngredients}
-          onRemoveItem={removeItemHandler}
-        />
+        {ingredientList}
       </section>
     </div>
   );
