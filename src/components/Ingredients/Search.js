@@ -31,8 +31,7 @@ const Search = React.memo((props) => {
 
         // Sending the HTTP request to fetch filtered ingredients data.
         sendRequest(
-          "https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients.json" +
-            query,
+          process.env.REACT_APP_FIREBASE_URL + "/ingredients.json" + query,
           "GET"
         );
       }

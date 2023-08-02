@@ -61,7 +61,7 @@ function Ingredients() {
     (ingredient) => {
       // Sending an HTTP request to add the new ingredient to the database.
       sendRequest(
-        "https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients.json",
+        process.env.REACT_APP_FIREBASE_URL + "/ingredients.json",
         "POST",
         JSON.stringify(ingredient),
         ingredient,
@@ -76,7 +76,7 @@ function Ingredients() {
     (itemId) => {
       // Sending an HTTP request to remove the ingredient with the given ID from the database.
       sendRequest(
-        `https://react-hooks-summary-32605-default-rtdb.firebaseio.com/ingredients/${itemId}/.json`,
+        `${process.env.REACT_APP_FIREBASE_URL}/ingredients/${itemId}/.json`,
         "DELETE",
         null,
         itemId,
