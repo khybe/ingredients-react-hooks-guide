@@ -13,7 +13,7 @@ Powerful 'Add Ingredients' app using React Hooks & Firebase. Real-time data sync
 
 - No backend coding needed
 - Real-time updates
-- User authentication & security
+- Demo User authentication & security
 
 ## Custom Hooks and Context API
 
@@ -41,7 +41,6 @@ Powerful 'Add Ingredients' app using React Hooks & Firebase. Real-time data sync
 
 - Thanks to Firebase
 - For questions or support, open an issue
-- We're continuously improving this project!
 
 Feel free to explore the code and follow the tutorial to enhance your React, Firebase, and state management skills.
 
